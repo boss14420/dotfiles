@@ -34,6 +34,8 @@ Plug 'dense-analysis/ale'
 Plug 'SirVer/ultisnips'
 Plug 'boss14420/vim-snippets'
 Plug 'ervandew/supertab'
+Plug 'windwp/nvim-autopairs'
+Plug 'yssl/QFEnter'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -51,6 +53,7 @@ Plug 'theHamsta/nvim-dap-virtual-text'
 "  \ 'do': 'python3 install_gadget.py --enable-cpp'
 "  \ }
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
+Plug 'nvim-treesitter/nvim-treesitter-textobjects'
 
 " colorscheme
 Plug 'overcache/NeoSolarized'
@@ -65,6 +68,8 @@ Plug 'Yggdroot/indentLine'
 call plug#end()
 
 set completeopt-=preview
+set completeopt+=menuone
+" set completepopup=highlight:Pmenu,border:off
 " <TAB>: completion.
 inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
 " preview
@@ -81,6 +86,7 @@ set shiftwidth=4
 set autoindent
 set wrap
 set cc=80
+highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
 filetype indent on
 
 set number
@@ -157,6 +163,8 @@ let g:ale_linters = {
 
 " white space
 highlight ExtraWhitespace ctermbg=red guibg=red
+highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+
 match ExtraWhitespace /\s\+$/
 au BufWinEnter * match ExtraWhitespace /\s\+$/
 au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
@@ -167,7 +175,13 @@ au BufWinLeave * call clearmatches()
 let g:OmniSharp_server_use_net6 = 1
 let g:OmniSharp_highlighting = 0
 let g:OmniSharp_log_dir = '/tmp/omnisharp-vim'
-let g:OmniSharp_loglevel = 'debug'
+let g:OmniSharp_loglevel = 'info'
+let g:OmniSharp_popup_options = {
+\ 'wrap': v:true,
+\ 'winblend': 10,
+\ 'winhl': 'Normal:Normal',
+\ 'border': 'rounded'
+\}
 autocmd FileType cs     nnoremap <silent> K :OmniSharpDocumentation<CR>
 autocmd FileType cs     nnoremap <F12> :OmniSharpGotoDefinition<CR>
 autocmd FileType cs     nnoremap <C-LeftMouse> :OmniSharpGotoDefinition<CR>
@@ -175,6 +189,50 @@ autocmd FileType cs     nnoremap <C-LeftMouse> :OmniSharpGotoDefinition<CR>
 autocmd FileType cs     nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
 autocmd FileType cs     nnoremap <buffer> gv :OmniSharpGotoDefinition vsplit<CR>
 autocmd FileType cs     nnoremap <buffer> gs :OmniSharpGotoDefinition split<CR>
+
+
+augroup omnisharp_commands
+    autocmd!
+
+    " Show type information automatically when the cursor stops moving.
+    " Note that the type is echoed to the Vim command line, and will overwrite
+    " any other messages in this space including e.g. ALE linting messages.
+    autocmd CursorHold *.cs OmniSharpTypeLookup
+
+    " The following commands are contextual, based on the cursor position.
+    autocmd FileType cs nmap <silent> <buffer> gd <Plug>(omnisharp_go_to_definition)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osfu <Plug>(omnisharp_find_usages)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osfi <Plug>(omnisharp_find_implementations)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>ospd <Plug>(omnisharp_preview_definition)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>ospi <Plug>(omnisharp_preview_implementations)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>ost <Plug>(omnisharp_type_lookup)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osd <Plug>(omnisharp_documentation)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osfs <Plug>(omnisharp_find_symbol)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osfx <Plug>(omnisharp_fix_usings)
+    autocmd FileType cs nmap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
+    autocmd FileType cs imap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
+
+    " Navigate up and down by method/property/field
+    autocmd FileType cs nmap <silent> <buffer> [[ <Plug>(omnisharp_navigate_up)
+    autocmd FileType cs nmap <silent> <buffer> ]] <Plug>(omnisharp_navigate_down)
+    " Find all code errors/warnings for the current solution and populate the quickfix window
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osgcc <Plug>(omnisharp_global_code_check)
+    " Contextual code actions (uses fzf, vim-clap, CtrlP or unite.vim selector when available)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
+    autocmd FileType cs xmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
+    " Repeat the last code action performed (does not use a selector)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
+    autocmd FileType cs xmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
+
+    autocmd FileType cs nmap <silent> <buffer> <Leader>os= <Plug>(omnisharp_code_format)
+
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osnm <Plug>(omnisharp_rename)
+
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osre <Plug>(omnisharp_restart_server)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>osst <Plug>(omnisharp_start_server)
+    autocmd FileType cs nmap <silent> <buffer> <Leader>ossp <Plug>(omnisharp_stop_server)
+augroup END
+
 
 nnoremap <buffer> gr :PRg<CR>
 nnoremap <buffer> gp :PRg<CR>
@@ -209,8 +267,19 @@ nnoremap <silent> <localleader>oj :FSSplitBelow<cr>
 nnoremap <silent> <localleader>ok :FSSplitAbove<cr>
 nnoremap <silent> <localleader>ol :FSSplitRight<cr>
 
+" Compile C
+let $CXX = 'g++'
+let $CXXFLAGS = '-std=c++20 -g -Wall -Wextra -fsanitize=address -fsanitize=undefined'
+"let $LDFLAGS = ''
+"let $LDFLIBS = ''
+
+au filetype cpp nnoremap <silent> <C-F9> :make %<<cr>
+au filetype cpp nnoremap <silent> <C-F5> :./%< 
+
 " Vista
-"nnoremap <silent> <F5> :Vista!!<CR>
+nnoremap <silent> <F3> :Vista!!<CR>
+
+
 
 "" Vimspector
 "command! -nargs=+ Vfb call vimspector#AddFunctionBreakpoint(<f-args>)
@@ -233,11 +302,31 @@ let g:deoplete#sources#clang#clang_header= '/usr/lib/clang'
 
 " treesitter
 lua << EOF
+    local ensure_packer = function()
+      local fn = vim.fn
+      local install_path = fn.stdpath('data')..'/site/pack/packer/start/packer.nvim'
+      if fn.empty(fn.glob(install_path)) > 0 then
+        fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
+        vim.cmd [[packadd packer.nvim]]
+        return true
+      end
+      return false
+    end
+
+    local packer_bootstrap = ensure_packer()
+
     require('packer').startup(function(use)
-        use {
-            'Joakker/lua-json5',
-            run = './install.sh'
-        }
+      use 'wbthomason/packer.nvim'
+      use {
+          'Joakker/lua-json5',
+          run = './install.sh'
+      }
+
+      -- Automatically set up your configuration after cloning packer.nvim
+      -- Put this at the end after all plugins
+      if packer_bootstrap then
+        require('packer').sync()
+      end
     end)
 
     -- lsp --
@@ -246,18 +335,15 @@ lua << EOF
     -- treesitter --
 
     require'nvim-treesitter.configs'.setup {
-      highlight = {
-        enable = true,
-        -- disable = { "cs" },
-        -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
-        -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
-        -- Using this option may slow down your editor, and you may see some duplicate highlights.
-        -- Instead of true it can also be a list of languages
-        additional_vim_regex_highlighting = false,
-      },
-    }
-
-    require'nvim-treesitter.configs'.setup {
+        highlight = {
+            enable = true,
+            -- disable = { "cs" },
+            -- Setting this to true will run `:h syntax` and tree-sitter at the same time.
+            -- Set this to `true` if you depend on 'syntax' being enabled (like for indentation).
+            -- Using this option may slow down your editor, and you may see some duplicate highlights.
+            -- Instead of true it can also be a list of languages
+            additional_vim_regex_highlighting = false,
+        },
         incremental_selection = {
             enable = true,
             keymaps = {
@@ -265,6 +351,39 @@ lua << EOF
                 node_incremental = "grn",
                 scope_incremental = "grc",
                 node_decremental = "grm",
+            },
+        },
+        textobjects = {
+            disable = {"cs"},
+            move = {
+                enable = true,
+                disable = {"cs"},
+                set_jumps = true, -- whether to set jumps in the jumplist
+                goto_next_start = {
+                    ["]m"] = "@function.outer",
+                    ["]]"] = { query = "@class.outer", desc = "Next class start" },
+                },
+                goto_next_end = {
+                    ["]M"] = "@function.outer",
+                    ["]["] = "@class.outer",
+                },
+                goto_previous_start = {
+                    ["[m"] = "@function.outer",
+                    ["[["] = "@class.outer",
+                },
+                goto_previous_end = {
+                    ["[M"] = "@function.outer",
+                    ["[]"] = "@class.outer",
+                },
+            },
+
+            lsp_interop = {
+                enable = true,
+                border = 'none',
+                peek_definition_code = {
+                    ["<leader>df"] = "@function.outer",
+                    ["<leader>dF"] = "@class.outer",
+                },
             },
         },
     }
@@ -333,6 +452,9 @@ lua << EOF
     end
 
     require("nvim-dap-virtual-text").setup()
+
+    -- auto pair
+    require("nvim-autopairs").setup {}
 EOF
 
 set foldmethod=expr
@@ -355,3 +477,4 @@ nnoremap <silent> <F7> <Cmd>lua require'dap'.run_last()<CR>
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+
