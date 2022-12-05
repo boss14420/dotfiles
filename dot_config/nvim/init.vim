@@ -6,6 +6,7 @@ call plug#begin()
 
 "lsp
 Plug 'neovim/nvim-lspconfig'
+Plug 'p00f/clangd_extensions.nvim'
 
 " OmniSharp
 Plug 'OmniSharp/omnisharp-vim'
@@ -36,6 +37,7 @@ Plug 'boss14420/vim-snippets'
 Plug 'ervandew/supertab'
 Plug 'windwp/nvim-autopairs'
 Plug 'yssl/QFEnter'
+Plug 'numToStr/Comment.nvim'
 
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -64,6 +66,8 @@ Plug 'navarasu/onedark.nvim'
 Plug 'ayu-theme/ayu-vim'
 
 Plug 'Yggdroot/indentLine'
+
+Plug 'williamboman/mason.nvim'
 
 call plug#end()
 
@@ -160,6 +164,9 @@ let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
 \ 'cpp': ['clang']
 \}
+let g:ale_cpp_clang_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
+let g:ale_cpp_gcc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
+let g:ale_cpp_cc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
 
 " white space
 highlight ExtraWhitespace ctermbg=red guibg=red
@@ -234,7 +241,7 @@ augroup omnisharp_commands
 augroup END
 
 
-nnoremap <buffer> gr :PRg<CR>
+"nnoremap <buffer> gr :PRg<CR>
 nnoremap <buffer> gp :PRg<CR>
 
 command! -bang -nargs=* PRg
@@ -330,7 +337,8 @@ lua << EOF
     end)
 
     -- lsp --
-    require'lspconfig'.clangd.setup{}
+    -- require'lspconfig'.clangd.setup{}
+    require("clangd_extensions").setup()
 
     -- treesitter --
 
@@ -354,7 +362,7 @@ lua << EOF
             },
         },
         textobjects = {
-            disable = {"cs"},
+            -- disable = {"cs"},
             move = {
                 enable = true,
                 disable = {"cs"},
@@ -379,7 +387,7 @@ lua << EOF
 
             lsp_interop = {
                 enable = true,
-                border = 'none',
+                border = 'rounded',
                 peek_definition_code = {
                     ["<leader>df"] = "@function.outer",
                     ["<leader>dF"] = "@class.outer",
@@ -455,6 +463,12 @@ lua << EOF
 
     -- auto pair
     require("nvim-autopairs").setup {}
+
+    -- comment.vim
+    require('Comment').setup()
+
+    -- mason
+    require("mason").setup()
 EOF
 
 set foldmethod=expr
