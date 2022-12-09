@@ -111,6 +111,9 @@ source $ZSH/oh-my-zsh.sh
 ################################################################
 # FZF
 
+source /usr/share/fzf/completion.zsh
+source /usr/share/fzf/key-bindings.zsh
+
 # Use ~~ as the trigger sequence instead of the default **
 export FZF_COMPLETION_TRIGGER='~~'
 
