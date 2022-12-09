@@ -362,10 +362,10 @@ lua << EOF
             },
         },
         textobjects = {
-            -- disable = {"cs"},
+            enable = true,
             move = {
                 enable = true,
-                disable = {"cs"},
+                disable = {"c_sharp"},
                 set_jumps = true, -- whether to set jumps in the jumplist
                 goto_next_start = {
                     ["]m"] = "@function.outer",
