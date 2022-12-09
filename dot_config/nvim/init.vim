@@ -278,12 +278,12 @@ nnoremap <silent> <localleader>ol :FSSplitRight<cr>
 
 " Compile C
 let $CXX = 'g++'
-let $CXXFLAGS = '-std=c++20 -g -Wall -Wextra -fsanitize=address -fsanitize=undefined'
+let $CXXFLAGS = '-std=c++2a -g -Wall -Wextra -fsanitize=address -fsanitize=undefined'
 "let $LDFLAGS = ''
 "let $LDFLIBS = ''
 
-au filetype cpp nnoremap <silent> <C-F9> :make %<<cr>
-au filetype cpp nnoremap <silent> <C-F5> :./%< 
+au filetype cpp nmap <C-B> :make %<<cr>
+"au filetype cpp nmap <C-R> :./%<
 
 " Vista
 nnoremap <silent> <F3> :Vista!!<CR>
