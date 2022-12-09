@@ -502,3 +502,6 @@ let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
+" Termdebug
+autocmd FileType cpp packadd termdebug
+let g:termdebug_wide = 1
