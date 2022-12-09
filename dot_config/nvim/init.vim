@@ -67,7 +67,9 @@ Plug 'ayu-theme/ayu-vim'
 
 Plug 'Yggdroot/indentLine'
 
+" mason
 Plug 'williamboman/mason.nvim'
+Plug 'jayp0521/mason-nvim-dap.nvim'
 
 call plug#end()
 
@@ -396,20 +398,31 @@ lua << EOF
         },
     }
 
+    -- mason
+    require("mason").setup()
+
     -- dap --
     local dap = require('dap')
-    dap.adapters.coreclr = {
-        type = 'executable',
-        command = '/usr/bin/netcoredbg',
-        args = {'--interpreter=vscode'}
-    }
 
-    dap.adapters.cppdbg = {
-        id = 'cppdbg',
-        type = 'executable',
-        --command = '~/.tools/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
-        command = vim.fn.expand('$HOME/.tools/cpptools/extension/debugAdapters/bin/OpenDebugAD7'),
-    }
+    require("mason-nvim-dap").setup({
+        ensure_installed = {"cppdbg", "codeclr"},
+        automatic_setup = true,
+    })
+    require 'mason-nvim-dap'.setup_handlers()
+
+    -- -- Adpater: configured by mason
+    -- dap.adapters.coreclr = {
+    --     type = 'executable',
+    --     command = '/usr/bin/netcoredbg',
+    --     args = {'--interpreter=vscode'}
+    -- }
+
+    -- dap.adapters.cppdbg = {
+    --     id = 'cppdbg',
+    --     type = 'executable',
+    --     --command = '~/.tools/cpptools/extension/debugAdapters/bin/OpenDebugAD7',
+    --     command = vim.fn.expand('$HOME/.tools/cpptools/extension/debugAdapters/bin/OpenDebugAD7'),
+    -- }
 
     require('dap.ext.vscode').json_decode = require'json5'.parse
     require('dap.ext.vscode').load_launchjs(nil, {coreclr = {'cs'}})
@@ -466,9 +479,6 @@ lua << EOF
 
     -- comment.vim
     require('Comment').setup()
-
-    -- mason
-    require("mason").setup()
 EOF
 
 set foldmethod=expr
