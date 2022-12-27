@@ -278,7 +278,7 @@ nnoremap <silent> <localleader>ol :FSSplitRight<cr>
 
 " Compile C
 let $CXX = 'g++'
-let $CXXFLAGS = '-std=c++2a -g -Wall -Wextra -fsanitize=address -fsanitize=undefined'
+let $CXXFLAGS = '-std=c++2a -g -Wall -Wextra -fsanitize=address -fsanitize=undefined -DDEBUG'
 "let $LDFLAGS = ''
 "let $LDFLIBS = ''
 
@@ -340,7 +340,24 @@ lua << EOF
 
     -- lsp --
     -- require'lspconfig'.clangd.setup{}
-    require("clangd_extensions").setup()
+    require("clangd_extensions").setup({
+        server = {
+            cmd = {
+              "clangd",
+              "--background-index",
+              "-j=4",
+              "--query-driver=/usr/bin/**/clang-*,/bin/clang,/bin/clang++,/usr/bin/gcc,/usr/bin/g++",
+              "--clang-tidy",
+              "--clang-tidy-checks=*",
+              "--all-scopes-completion",
+              "--cross-file-rename",
+              "--completion-style=detailed",
+              "--header-insertion-decorators",
+              "--header-insertion=iwyu",
+              "--pch-storage=memory",
+            }
+        }
+    })
 
     -- treesitter --
 
