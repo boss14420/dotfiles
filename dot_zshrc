@@ -221,7 +221,11 @@ bindkey -v
 # pulseaudio --start &> /dev/null &
 
 export WORKON_HOME=~/.virtualenvs
-source /usr/bin/virtualenvwrapper_lazy.sh
+if [[ -f /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh ]]; then
+    source /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh
+else
+    source /usr/bin/virtualenvwrapper_lazy.sh
+fi
 
 if [[ $(tty) = /dev/tty2 ]]; then
     #export TERM="fbterm"
