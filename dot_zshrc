@@ -1,12 +1,56 @@
-# Path to your oh-my-zsh installation.
-ZSH=/usr/share/oh-my-zsh/
+############### ZPLUG
+# zplug
+source ~/.zplug/init.zsh
+
+# Keep zplug itself up to date
+zplug 'zplug/zplug', hook-build:'zplug --self-manage'
+
+# fzf
+zplug "junegunn/fzf", use:"shell/*.zsh"
+
+# https://github.com/urbainvaes/fzf-marks store and jump to bookmarks in zsh
+zplug "urbainvaes/fzf-marks"
+
+setopt prompt_subst # Make sure prompt is able to be generated properly.
+zplug "caiogondim/bullet-train.zsh", use:bullet-train.zsh-theme, defer:3 # defer until other plugins like oh-my-zsh is loaded
+
+# warp directory
+zplug "mfaerevaag/wd", as:command, use:"wd.sh", hook-load:"wd() { . $ZPLUG_REPOS/mfaerevaag/wd/wd.sh }"
+
+
+zplug "zsh-users/zsh-completions"
+zplug "zsh-users/zsh-autosuggestions"
+zplug "zsh-users/zsh-syntax-highlighting", defer:2
+zplug "zsh-users/zsh-history-substring-search", defer:3
+
+# Supports oh-my-zsh plugins and the like
+zplug "plugins/git",   from:oh-my-zsh
+zplug "plugins/docker",   from:oh-my-zsh
+zplug "plugins/docker-compose",   from:oh-my-zsh
+
+# Install plugins if there are plugins that have not been installed
+if ! zplug check --verbose; then
+    printf "Install? [y/N]: "
+    if read -q; then
+        echo; zplug install
+    fi
+fi
+
+# Then, source plugins and add commands to $PATH
+zplug load # --verbose
+
+################ OH-MY-ZSH
+##
+## Path to your oh-my-zsh installation.
+##ZSH=/usr/share/oh-my-zsh/
+#ZSH=~/.oh-my-zsh/
 
 # Set name of the theme to load.
 # Look in ~/.oh-my-zsh/themes/
 # Optionally, if you set this to "random", it'll load a random theme each
 # time that oh-my-zsh is loaded.
 ZSH_THEME="bullet-train"
-DEFAULT_USER="boss14420"
+#DEFAULT_USER="boss14420"
 
 function my_git_info() {
     local vcs_info=$(echo $vcs_info_msg_0_ | sed -re 's/.*\[(.*)\].*/\1/')
@@ -37,7 +81,7 @@ BULLETTRAIN_PROMPT_ORDER=(
   dir
   screen
   virtualenv
-  conda
+  #conda
   aws
   git
   cmd_exec_time
@@ -81,7 +125,7 @@ plugins=(git docker docker-compose kubectl adb cp themes)
 #export PATH=$HOME/bin:/usr/local/bin:$PATH
 # export MANPATH="/usr/local/man:$MANPATH"
 
-source $ZSH/oh-my-zsh.sh
+#source $ZSH/oh-my-zsh.sh
 
 # You may need to manually set your language environment
 # export LANG=en_US.UTF-8
@@ -111,8 +155,8 @@ source $ZSH/oh-my-zsh.sh
 ################################################################
 # FZF
 
-source /usr/share/fzf/completion.zsh
-source /usr/share/fzf/key-bindings.zsh
+#source /usr/share/fzf/completion.zsh
+#source /usr/share/fzf/key-bindings.zsh
 
 # Use ~~ as the trigger sequence instead of the default **
 export FZF_COMPLETION_TRIGGER='~~'
