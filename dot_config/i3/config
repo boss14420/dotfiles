@@ -327,13 +327,14 @@ mode "mpd" {
 
 
 #default terminal
-bindsym $mod+Enter exec gnome-terminal
-bindsym $mod+F1    exec gnome-terminal
+bindsym $mod+Enter exec alacritty
+bindsym $mod+F1    exec alacritty
 
 # hide border on edges
 hide_edge_borders both
 
 # hide title bar
+for_window [class="[Pp]arsec"] border none
 for_window [class="[Ff]irefox"] border none
 for_window [class="luakit"] border none
 for_window [class="Terminator"] border pixel 1
@@ -368,5 +369,6 @@ exec sleep 3; ibus-daemon -x
 #exec --no-startup-id "sleep 2s && ibus-daemon -x"
 exec --no-startup-id "sleep 2s && goldendict"
 exec --no-startup-id "sleep 2s && picom"
+exec --no-startup-id "sleep 2s && ~/.scripts/random-wp.sh"
 #exec --no-startup-id "xrandr --output HDMI-1 --mode 1920x1080"
 

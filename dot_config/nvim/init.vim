@@ -92,7 +92,7 @@ set shiftwidth=4
 set autoindent
 set wrap
 set cc=80
-highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+"highlight ColorColumn ctermbg='#EE222222' guibg='#EE222222'
 filetype indent on
 
 set number
@@ -118,6 +118,9 @@ if exists('+termguicolors')
   set termguicolors
 endif
 
+" colorscheme
+
+lua require("tokyonight").setup({ transparent = true })
 colorscheme tokyonight-night
 
 let g:sonokai_diagnostic_text_highlight = 1
@@ -172,7 +175,7 @@ let g:ale_cpp_cc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
 
 " white space
 highlight ExtraWhitespace ctermbg=red guibg=red
-highlight ColorColumn ctermbg=lightgrey guibg=lightgrey
+highlight ColorColumn ctermbg=grey guibg=grey
 
 match ExtraWhitespace /\s\+$/
 au BufWinEnter * match ExtraWhitespace /\s\+$/
