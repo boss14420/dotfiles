@@ -348,6 +348,9 @@ alias tmux="TERM=screen-256color-bce tmux"
 source <(command kubectl completion zsh)
 source <(helm completion zsh)
 
+# zoxide
+eval "$(zoxide init zsh)"
+
 #kubectl () {
 #    command kubectl $*
 #    if [[ -z $KUBECTL_COMPLETE ]]
