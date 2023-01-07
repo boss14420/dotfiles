@@ -26,6 +26,7 @@ Plug 'ncm2/float-preview.nvim'
 Plug 'vim-airline/vim-airline'
 Plug 'preservim/nerdtree'
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-surround'
 Plug 'airblade/vim-gitgutter'
 "Plug 'vim-ctrlspace/vim-ctrlspace'
 Plug 'ctrlpvim/ctrlp.vim'
@@ -86,7 +87,7 @@ let g:float_preview#docked = 0
 " Basic config
 set expandtab
 set textwidth=79
-set tabstop=8
+set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set autoindent
