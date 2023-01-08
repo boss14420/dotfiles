@@ -170,9 +170,9 @@ let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
 \ 'cpp': ['clang']
 \}
-let g:ale_cpp_clang_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
-let g:ale_cpp_gcc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
-let g:ale_cpp_cc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion'
+let g:ale_cpp_clang_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion -DDEBUG'
+let g:ale_cpp_gcc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion -DDEBUG'
+let g:ale_cpp_cc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion -DDEBUG'
 
 " white space
 highlight ExtraWhitespace ctermbg=red guibg=red

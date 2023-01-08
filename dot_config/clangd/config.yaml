@@ -1,2 +1,8 @@
 CompileFlags:
-  Add: [-Wall, -Wextra, -Weffc++, -std=c++2a]
+  Add:
+    - -Wall
+    - -Wextra
+    - -Weffc++
+    - -Wsign-conversion
+    - -std=c++2a
+    - -DDEBUG
