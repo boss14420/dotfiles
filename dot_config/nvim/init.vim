@@ -7,13 +7,12 @@ call plug#begin()
 "lsp
 Plug 'neovim/nvim-lspconfig'
 Plug 'p00f/clangd_extensions.nvim'
+Plug 'Hoffs/omnisharp-extended-lsp.nvim'
+
 
 " null-ls
 Plug 'nvim-lua/plenary.nvim'
 Plug 'jose-elias-alvarez/null-ls.nvim'
-
-" OmniSharp
-Plug 'OmniSharp/omnisharp-vim'
 
 "" deoplete
 "if has('nvim')
@@ -100,6 +99,7 @@ Plug 'Yggdroot/indentLine'
 
 " mason
 Plug 'williamboman/mason.nvim'
+Plug 'williamboman/mason-lspconfig.nvim'
 Plug 'jayp0521/mason-nvim-dap.nvim'
 
 call plug#end()
@@ -220,73 +220,6 @@ au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 au InsertLeave * match ExtraWhitespace /\s\+$/
 au BufWinLeave * call clearmatches()
 
-""""""""""""""""""""""""""""""
-" Omnisharp
-let g:OmniSharp_server_use_net6 = 1
-let g:OmniSharp_highlighting = 0
-let g:OmniSharp_log_dir = '/tmp/omnisharp-vim'
-let g:OmniSharp_loglevel = 'info'
-let g:OmniSharp_popup_options = {
-\ 'wrap': v:true,
-\ 'winblend': 10,
-\ 'winhl': 'Normal:Normal',
-\ 'border': 'rounded'
-\}
-
-let g:OmniSharp_selector_ui = 'fzf'
-let g:OmniSharp_selector_findusages = 'fzf'
-autocmd FileType cs     nnoremap <silent> K :OmniSharpDocumentation<CR>
-autocmd FileType cs     nnoremap <F12> :OmniSharpGotoDefinition<CR>
-autocmd FileType cs     nnoremap <C-LeftMouse> :OmniSharpGotoDefinition<CR>
-
-autocmd FileType cs     nnoremap <buffer> gd :OmniSharpGotoDefinition<CR>
-autocmd FileType cs     nnoremap <buffer> gv :OmniSharpGotoDefinition vsplit<CR>
-autocmd FileType cs     nnoremap <buffer> gs :OmniSharpGotoDefinition split<CR>
-
-
-augroup omnisharp_commands
-    autocmd!
-
-    " Show type information automatically when the cursor stops moving.
-    " Note that the type is echoed to the Vim command line, and will overwrite
-    " any other messages in this space including e.g. ALE linting messages.
-    autocmd CursorHold *.cs OmniSharpTypeLookup
-
-    " The following commands are contextual, based on the cursor position.
-    autocmd FileType cs nmap <silent> <buffer> gd <Plug>(omnisharp_go_to_definition)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osfu <Plug>(omnisharp_find_usages)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osfi <Plug>(omnisharp_find_implementations)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>ospd <Plug>(omnisharp_preview_definition)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>ospi <Plug>(omnisharp_preview_implementations)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>ost <Plug>(omnisharp_type_lookup)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osd <Plug>(omnisharp_documentation)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osfs <Plug>(omnisharp_find_symbol)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osfx <Plug>(omnisharp_fix_usings)
-    autocmd FileType cs nmap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
-    autocmd FileType cs imap <silent> <buffer> <C-\> <Plug>(omnisharp_signature_help)
-
-    " Navigate up and down by method/property/field
-    autocmd FileType cs nmap <silent> <buffer> [[ <Plug>(omnisharp_navigate_up)
-    autocmd FileType cs nmap <silent> <buffer> ]] <Plug>(omnisharp_navigate_down)
-    " Find all code errors/warnings for the current solution and populate the quickfix window
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osgcc <Plug>(omnisharp_global_code_check)
-    " Contextual code actions (uses fzf, vim-clap, CtrlP or unite.vim selector when available)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
-    autocmd FileType cs xmap <silent> <buffer> <Leader>osca <Plug>(omnisharp_code_actions)
-    " Repeat the last code action performed (does not use a selector)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
-    autocmd FileType cs xmap <silent> <buffer> <Leader>os. <Plug>(omnisharp_code_action_repeat)
-
-    autocmd FileType cs nmap <silent> <buffer> <Leader>os= <Plug>(omnisharp_code_format)
-
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osnm <Plug>(omnisharp_rename)
-
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osre <Plug>(omnisharp_restart_server)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>osst <Plug>(omnisharp_start_server)
-    autocmd FileType cs nmap <silent> <buffer> <Leader>ossp <Plug>(omnisharp_stop_server)
-augroup END
-
-
 "nnoremap <buffer> gr :PRg<CR>
 nnoremap <buffer> gp :PRg<CR>
 
@@ -382,7 +315,6 @@ lua << EOF
       end
     end)
 
-    -- disable nvim-comp beacuse it's not support omnisharp-vim
     -- nvim-cmp --
     local cmp = require'cmp'
     cmp.setup({
@@ -491,12 +423,22 @@ lua << EOF
       vim.keymap.set('n', '<space>f', function() vim.lsp.buf.format { async = true } end, bufopts)
     end
 
+    -- mason
+    require("mason").setup()
+    require("mason-lspconfig").setup({
+        ensure_installed = { "omnisharp", "clangd" }
+    })
+
+    -- lsp
     -- require'lspconfig'.clangd.setup{}
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
     require("clangd_extensions").setup({
         server = {
             on_attach = on_attach,
             capabilities = capabilities,
+            --handlers = {
+            --    ["textDocument/references"] = telescope_builtin.lsp_references,
+            --},
             cmd = {
               "clangd",
               "--background-index",
@@ -513,6 +455,51 @@ lua << EOF
             }
         }
     })
+
+    require'lspconfig'.omnisharp.setup{
+        on_attach = on_attach,
+        capabilities = capabilities,
+
+        handlers = {
+            ["textDocument/definition"] = require('omnisharp_extended').handler,
+            --["textDocument/references"] = telescope_builtin.lsp_references,
+        },
+
+        -- Enables support for reading code style, naming convention and analyzer
+        -- settings from .editorconfig.
+        enable_editorconfig_support = true,
+
+        -- If true, MSBuild project system will only load projects for files that
+        -- were opened in the editor. This setting is useful for big C# codebases
+        -- and allows for faster initialization of code navigation features only
+        -- for projects that are relevant to code that is being edited. With this
+        -- setting enabled OmniSharp may load fewer projects and may thus display
+        -- incomplete reference lists for symbols.
+        enable_ms_build_load_projects_on_demand = false,
+
+        -- Enables support for roslyn analyzers, code fixes and rulesets.
+        enable_roslyn_analyzers = true,
+
+        -- Specifies whether 'using' directives should be grouped and sorted during
+        -- document formatting.
+        organize_imports_on_format = false,
+
+        -- Enables support for showing unimported types and unimported extension
+        -- methods in completion lists. When committed, the appropriate using
+        -- directive will be added at the top of the current file. This option can
+        -- have a negative impact on initial completion responsiveness,
+        -- particularly for the first few completion sessions after opening a
+        -- solution.
+        enable_import_completion = true,
+
+        -- Specifies whether to include preview versions of the .NET SDK when
+        -- determining which version to use for project loading.
+        sdk_include_prereleases = true,
+
+        -- Only run analyzers against open files when 'enableRoslynAnalyzers' is
+        -- true
+        analyze_open_documents_only = false,
+    }
 
     -- treesitter --
 
@@ -569,9 +556,6 @@ lua << EOF
             },
         },
     }
-
-    -- mason
-    require("mason").setup()
 
     -- dap --
     local dap = require('dap')
