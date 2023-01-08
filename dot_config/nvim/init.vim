@@ -72,6 +72,13 @@ Plug 'numToStr/Comment.nvim'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
 
+"" telescope
+Plug 'nvim-telescope/telescope.nvim', { 'tag': '0.1.0' }
+Plug 'nvim-telescope/telescope-fzf-native.nvim', { 'do': 'cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build' }
+Plug 'nvim-telescope/telescope-ui-select.nvim'
+Plug 'fhill2/telescope-ultisnips.nvim'
+Plug 'gbrlsnchs/telescope-lsp-handlers.nvim'
+
 " cpp
 Plug 'derekwyatt/vim-fswitch'
 Plug 'liuchengxu/vista.vim'
@@ -388,6 +395,41 @@ lua << EOF
       })
     })
 
+    -- Telescope --
+    local telescope_builtin = require('telescope.builtin')
+    vim.keymap.set('n', '<leader>ff', telescope_builtin.find_files, {})
+    vim.keymap.set('n', '<leader>fg', telescope_builtin.live_grep, {})
+    vim.keymap.set('n', '<leader>fb', telescope_builtin.buffers, {})
+    vim.keymap.set('n', '<leader>fh', telescope_builtin.help_tags, {})
+
+    local telescope = require('telescope')
+    telescope.setup {
+      extensions = {
+        fzf = {
+          fuzzy = true,                    -- false will only do exact matching
+          override_generic_sorter = true,  -- override the generic sorter
+          override_file_sorter = true,     -- override the file sorter
+          case_mode = "smart_case",        -- or "ignore_case" or "respect_case"
+                                           -- the default case_mode is "smart_case"
+        },
+        lsp_handlers = {
+		  code_action = {
+            telescope = require('telescope.themes').get_dropdown({}),
+		  },
+          disable = {
+            ["textDocument/definition"] = true,
+          },
+		},
+        ["ui-select"] = {
+            require('telescope.themes').get_dropdown({}),
+        }
+      }
+    }
+    telescope.load_extension('fzf')
+    telescope.load_extension('ultisnips')
+    telescope.load_extension('lsp_handlers')
+    telescope.load_extension("ui-select")
+
     -- lsp --
     -- Mappings.
     -- See `:help vim.diagnostic.*` for documentation on any of the below functions
@@ -408,6 +450,8 @@ lua << EOF
       local bufopts = { noremap=true, silent=true, buffer=bufnr }
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
+      vim.keymap.set('n', 'gv', ':Telescope lsp_definitions vsplit<CR>', bufopts)
+      vim.keymap.set('n', 'gs', ':Telescope lsp_definitions split<CR>', bufopts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, bufopts)
       vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, bufopts)
