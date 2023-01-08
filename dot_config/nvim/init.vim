@@ -8,6 +8,10 @@ call plug#begin()
 Plug 'neovim/nvim-lspconfig'
 Plug 'p00f/clangd_extensions.nvim'
 
+" null-ls
+Plug 'nvim-lua/plenary.nvim'
+Plug 'jose-elias-alvarez/null-ls.nvim'
+
 " OmniSharp
 Plug 'OmniSharp/omnisharp-vim'
 
@@ -192,6 +196,12 @@ map <F2> :NERDTreeToggle<CR><CR>
 "let g:CtrlSpaceSaveWorkspaceOnSwitch = 1
 "let g:CtrlSpaceSaveWorkspaceOnExit = 1
 
+let g:ale_pattern_options_enabled = 1
+let g:ale_pattern_options = {
+\   '.*': { 'ale_enabled': 0},
+\   '\.cs$': { 'ale_enabled': 1}
+\}
+
 let g:ale_linters = {
 \ 'cs': ['OmniSharp'],
 \ 'cpp': ['clang']
@@ -201,7 +211,7 @@ let g:ale_cpp_gcc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion
 let g:ale_cpp_cc_options = '-std=c++2a -Wall -Wextra -Weffc++ -Wsign-conversion -DDEBUG'
 
 " white space
-highlight ExtraWhitespace ctermbg=red guibg=red
+" highlight ExtraWhitespace ctermbg=red guibg=red
 highlight ColorColumn ctermbg=grey guibg=grey
 
 match ExtraWhitespace /\s\+$/
@@ -210,6 +220,7 @@ au InsertEnter * match ExtraWhitespace /\s\+\%#\@<!$/
 au InsertLeave * match ExtraWhitespace /\s\+$/
 au BufWinLeave * call clearmatches()
 
+""""""""""""""""""""""""""""""
 " Omnisharp
 let g:OmniSharp_server_use_net6 = 1
 let g:OmniSharp_highlighting = 0
@@ -221,6 +232,9 @@ let g:OmniSharp_popup_options = {
 \ 'winhl': 'Normal:Normal',
 \ 'border': 'rounded'
 \}
+
+let g:OmniSharp_selector_ui = 'fzf'
+let g:OmniSharp_selector_findusages = 'fzf'
 autocmd FileType cs     nnoremap <silent> K :OmniSharpDocumentation<CR>
 autocmd FileType cs     nnoremap <F12> :OmniSharpGotoDefinition<CR>
 autocmd FileType cs     nnoremap <C-LeftMouse> :OmniSharpGotoDefinition<CR>
@@ -368,9 +382,22 @@ lua << EOF
       end
     end)
 
+    -- disable nvim-comp beacuse it's not support omnisharp-vim
     -- nvim-cmp --
     local cmp = require'cmp'
     cmp.setup({
+      -- https://github.com/hrsh7th/nvim-cmp/wiki/Advanced-techniques#disabling-completion-in-certain-contexts-such-as-comments
+      enabled = function()
+        -- disable completion in comments
+        local context = require 'cmp.config.context'
+        -- keep command mode completion enabled when cursor is in a comment
+        if vim.api.nvim_get_mode().mode == 'c' then
+          return true
+        else
+          return not context.in_treesitter_capture("comment") 
+            and not context.in_syntax_group("Comment")
+        end
+      end,
       snippet = {
         -- REQUIRED - you must specify a snippet engine
         expand = function(args)
@@ -389,7 +416,7 @@ lua << EOF
         ['<C-f>'] = cmp.mapping.scroll_docs(4),
         ['<C-Space>'] = cmp.mapping.complete(),
         ['<C-e>'] = cmp.mapping.abort(),
-        ['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
+        ['<CR>'] = cmp.mapping.confirm({ select = false }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
       }),
       sources = cmp.config.sources({
           { name = 'nvim_lsp' },
@@ -441,12 +468,12 @@ lua << EOF
     -- Use an on_attach function to only map the following keys
     -- after the language server attaches to the current buffer
     local on_attach = function(client, bufnr)
-    -- Enable completion triggered by <c-x><c-o>
-    vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
+      -- Enable completion triggered by <c-x><c-o>
+      vim.api.nvim_buf_set_option(bufnr, 'omnifunc', 'v:lua.vim.lsp.omnifunc')
 
-    -- Mappings.
-    -- See `:help vim.lsp.*` for documentation on any of the below functions
-    local bufopts = { noremap=true, silent=true, buffer=bufnr }
+      -- Mappings.
+      -- See `:help vim.lsp.*` for documentation on any of the below functions
+      local bufopts = { noremap=true, silent=true, buffer=bufnr }
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, bufopts)
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, bufopts)
       vim.keymap.set('n', 'K', vim.lsp.buf.hover, bufopts)
