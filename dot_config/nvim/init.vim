@@ -93,6 +93,7 @@ Plug 'theHamsta/nvim-dap-virtual-text'
 "  \ }
 Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'nvim-treesitter/nvim-treesitter-textobjects'
+Plug 'RRethy/nvim-treesitter-textsubjects'
 
 " colorscheme
 Plug 'overcache/NeoSolarized'
@@ -522,7 +523,7 @@ lua << EOF
         enable_ms_build_load_projects_on_demand = false,
 
         -- Enables support for roslyn analyzers, code fixes and rulesets.
-        enable_roslyn_analyzers = true,
+        enable_roslyn_analyzers = false,
 
         -- Specifies whether 'using' directives should be grouped and sorted during
         -- document formatting.
@@ -558,19 +559,32 @@ lua << EOF
             additional_vim_regex_highlighting = false,
         },
         incremental_selection = {
-            enable = true,
+            disable = true,
+            enable = { 'c_sharp' },
             keymaps = {
-                init_selection = "gnn",
-                node_incremental = "grn",
-                scope_incremental = "grc",
-                node_decremental = "grm",
+                init_selection = "<CR>",
+                node_incremental = "<CR>",
+                scope_incremental = ";",
+                node_decremental = "<BS>",
             },
+        },
+        textsubjects = {
+            enable = true,
+            disable = { 'c_sharp' },
+            prev_selection = '<BS>', -- (Optional) keymap to select the previous selection
+            keymaps = {
+                ['<CR>'] = 'textsubjects-smart',
+                [';'] = 'textsubjects-container-outer',
+                ['i;'] = 'textsubjects-container-inner',
+            },
+        },
+        indent = {
+            enable = true,
         },
         textobjects = {
             enable = true,
             move = {
                 enable = true,
-                disable = {"c_sharp"},
                 set_jumps = true, -- whether to set jumps in the jumplist
                 goto_next_start = {
                     ["]m"] = "@function.outer",
