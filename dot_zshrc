@@ -264,7 +264,10 @@ plugins=(git docker docker-compose kubectl adb cp themes)
 #source /usr/share/fzf/key-bindings.zsh
 
 # Use ~~ as the trigger sequence instead of the default **
-export FZF_COMPLETION_TRIGGER='~~'
+export FZF_COMPLETION_TRIGGER='**'
+
+# Tab key binding
+bindkey '^T' fzf-completion
 
 # Options to fzf command
 export FZF_COMPLETION_OPTS='+c -x'
