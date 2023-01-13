@@ -9,6 +9,8 @@ Plug 'neovim/nvim-lspconfig'
 Plug 'p00f/clangd_extensions.nvim'
 Plug 'Hoffs/omnisharp-extended-lsp.nvim'
 
+Plug 'folke/neoconf.nvim'
+
 
 " null-ls
 Plug 'nvim-lua/plenary.nvim'
@@ -471,12 +473,26 @@ lua << EOF
     -- mason
     require("mason").setup()
     require("mason-lspconfig").setup({
-        ensure_installed = { "omnisharp", "clangd" }
+        ensure_installed = { "omnisharp", "clangd", "pylsp" }
     })
 
+    -- neoconf
+    require("neoconf").setup({
+    })
+
+    -----------------------------------------
     -- lsp
+
     -- require'lspconfig'.clangd.setup{}
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+    -- pylsp
+    require'lspconfig'.pylsp.setup({
+        on_attach = on_attach,
+        capabilities = capabilities,
+    })
+
+    -- clang
     require("clangd_extensions").setup({
         server = {
             on_attach = on_attach,
