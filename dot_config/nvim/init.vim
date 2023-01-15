@@ -105,7 +105,8 @@ Plug 'catppuccin/nvim', { 'as': 'catppuccin' }
 Plug 'navarasu/onedark.nvim'
 Plug 'ayu-theme/ayu-vim'
 
-Plug 'Yggdroot/indentLine'
+"Plug 'Yggdroot/indentLine'
+Plug 'lukas-reineke/indent-blankline.nvim'
 
 " mason
 Plug 'williamboman/mason.nvim'
@@ -146,8 +147,8 @@ autocmd InsertLeave * :set relativenumber
 " IndentLine {{
 "let g:indentLine_char = ''
 "let g:indentLine_first_char = ''
-let g:indentLine_char = '|'
-let g:indentLine_first_char = '|'
+"let g:indentLine_char = '|'
+"let g:indentLine_first_char = '|'
 let g:indentLine_showFirstIndentLevel = 1
 let g:indentLine_setColors = 0
 " }}
@@ -709,6 +710,13 @@ lua << EOF
 
     -- comment.vim
     require('Comment').setup()
+
+    -- indent-blankline
+    require("indent_blankline").setup {
+        -- for example, context is off by default, use this to turn it on
+        show_current_context = true,
+        show_current_context_start = true,
+    }
 EOF
 
 set foldmethod=expr
