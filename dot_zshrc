@@ -2,6 +2,13 @@
 autoload -U promptinit
 promptinit
 
+## codex
+export ZSH=${ZSH:-~/.zplug/repos/robbyrussell/oh-my-zsh}
+export ZSH_CUSTOM=$ZSH/custom
+source $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh
+setopt interactive_comments
+bindkey '^X' create_completion
+
 ############### ZPLUG
 # zplug
 source ~/.zplug/init.zsh
@@ -31,6 +38,9 @@ zplug "zsh-users/zsh-history-substring-search", defer:3
 zplug "plugins/git",   from:oh-my-zsh
 zplug "plugins/docker",   from:oh-my-zsh
 zplug "plugins/docker-compose",   from:oh-my-zsh
+
+## codex
+# zplug "tom-doerr/zsh_codex", from:oh-my-zsh
 
 # Install plugins if there are plugins that have not been installed
 if ! zplug check --verbose; then
@@ -387,3 +397,4 @@ function jwt-decode() {
 
 # GPG
 export GPG_TTY=$(tty)
+ZSH_HIGHLIGHT_STYLES[comment]='fg=grey'
