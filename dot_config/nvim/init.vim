@@ -87,6 +87,8 @@ Plug 'liuchengxu/vista.vim'
 
 " dap
 Plug 'mfussenegger/nvim-dap'
+Plug 'mfussenegger/nvim-dap-python'
+
 Plug 'rcarriga/nvim-dap-ui'
 Plug 'theHamsta/nvim-dap-virtual-text'
 
@@ -689,6 +691,8 @@ lua << EOF
                 end,
         },
     }
+
+    -- require('dap-python').setup
 
     local dapui = require("dapui")
     dapui.setup()
