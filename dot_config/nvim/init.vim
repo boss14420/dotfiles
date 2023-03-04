@@ -55,7 +55,9 @@ Plug 'quangnguyen30192/cmp-nvim-ultisnips'
 Plug 'ncm2/float-preview.nvim'
 
 Plug 'vim-airline/vim-airline'
-Plug 'preservim/nerdtree'
+Plug 'nvim-tree/nvim-web-devicons' " optional, for file icons
+Plug 'nvim-tree/nvim-tree.lua'
+"`bPlug 'preservim/nerdtree'
 Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-surround'
 Plug 'airblade/vim-gitgutter'
@@ -197,7 +199,7 @@ map <down> <nop>
 map <left> <nop>
 map <right> <nop>
 
-map <F2> :NERDTreeToggle<CR><CR>
+map <F2> :NvimTreeToggle<CR><CR>
 
 "" ctrlspace
 "set nocompatible
@@ -721,6 +723,17 @@ lua << EOF
         show_current_context = true,
         show_current_context_start = true,
     }
+
+    -- nvim-tree
+    -- disable netrw at the very start of your init.lua (strongly advised)
+    vim.g.loaded_netrw = 1
+    vim.g.loaded_netrwPlugin = 1
+
+    -- set termguicolors to enable highlight groups
+    vim.opt.termguicolors = true
+
+    -- empty setup using defaults
+    require("nvim-tree").setup()
 EOF
 
 set foldmethod=expr
