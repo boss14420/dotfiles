@@ -198,6 +198,7 @@ map <up> <nop>
 map <down> <nop>
 map <left> <nop>
 map <right> <nop>
+imap jj <Esc>
 
 map <F2> :NvimTreeToggle<CR><CR>
 
