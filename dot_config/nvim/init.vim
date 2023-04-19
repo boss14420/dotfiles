@@ -786,3 +786,11 @@ let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 " Termdebug
 autocmd FileType cpp packadd termdebug
 let g:termdebug_wide = 1
+
+" Vista
+  let g:vista_executive_for = {
+      \ 'cpp': 'nvim_lsp',
+      \ 'python': 'nvim_lsp',
+      \ 'c_sharp': 'nvim_lsp',
+      \ }
+ 
