@@ -87,6 +87,9 @@ Plug 'gbrlsnchs/telescope-lsp-handlers.nvim'
 Plug 'derekwyatt/vim-fswitch'
 Plug 'liuchengxu/vista.vim'
 
+" glsl
+Plug 'tikhomirov/vim-glsl'
+
 " dap
 Plug 'mfussenegger/nvim-dap'
 Plug 'mfussenegger/nvim-dap-python'
