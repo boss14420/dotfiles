@@ -504,7 +504,12 @@ lua << EOF
     -- mason
     require("mason").setup()
     require("mason-lspconfig").setup({
-        ensure_installed = { "omnisharp", "clangd", "pylsp" }
+        ensure_installed = {
+            "omnisharp",
+            "clangd",
+            "pylsp",
+            "jdtls"
+        }
     })
 
     -- neoconf
@@ -516,6 +521,9 @@ lua << EOF
 
     -- require'lspconfig'.clangd.setup{}
     local capabilities = require('cmp_nvim_lsp').default_capabilities()
+
+    -- java
+    require'lspconfig'.jdtls.setup{}
 
     -- pylsp
     require'lspconfig'.pylsp.setup({
@@ -668,8 +676,8 @@ lua << EOF
     require("mason-nvim-dap").setup({
         ensure_installed = {"cppdbg", "codeclr"},
         automatic_setup = true,
+        handler = {},
     })
-    require 'mason-nvim-dap'.setup_handlers()
 
     -- -- Adpater: configured by mason
     -- dap.adapters.coreclr = {
