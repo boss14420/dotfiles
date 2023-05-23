@@ -398,3 +398,5 @@ function jwt-decode() {
 # GPG
 export GPG_TTY=$(tty)
 ZSH_HIGHLIGHT_STYLES[comment]='fg=grey'
+
+neofetch
