@@ -233,7 +233,7 @@ BULLETTRAIN_PROMPT_ORDER=(
 # Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker docker-compose kubectl adb cp themes)
+plugins=(git docker docker-compose adb cp themes)
 
 # User configuration
 
@@ -358,8 +358,8 @@ alias tmux="TERM=screen-256color-bce tmux"
 
 # kubectl completion
 
-source <(command kubectl completion zsh)
-source <(helm completion zsh)
+#source <(command kubectl completion zsh)
+#source <(helm completion zsh)
 
 # zoxide
 eval "$(zoxide init zsh)"
