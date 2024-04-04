@@ -304,27 +304,33 @@ bindsym $mod+control+Down          exec pulseaudio-ctl down
 bindsym $mod+control+Up            exec pulseaudio-ctl up
 #bindsym $mod+control+Down          exec pactl set-sink-input-volume $(pactl list sink-inputs | head -1 | cut -d'#' -f2) "-5%"
 #bindsym $mod+control+Up            exec pactl set-sink-input-volume $(pactl list sink-inputs | head -1 | cut -d'#' -f2) "+5%"
-bindsym $mod+m                      mode "mpd"
-bindsym $mod1+m+$mod1+n             exec mpc next
-bindsym $mod1+m+p                   exec mpc prev
-bindsym mod1+m+t                   exec mpc toggle
-bindsym $mod1+m+s                   exec mpc stop
-bindsym $mod1+m+b                   exec mpc seek -7
-bindsym $mod1+m+f                   exec mpc seek +7
+#bindsym $mod+m                      mode "mpd"
+#bindsym $mod1+m+$mod1+n             exec mpc next
+#bindsym $mod1+m+p                   exec mpc prev
+#bindsym mod1+m+t                   exec mpc toggle
+#bindsym $mod1+m+s                   exec mpc stop
+#bindsym $mod1+m+b                   exec mpc seek -7
+#bindsym $mod1+m+f                   exec mpc seek +7
+#
+#mode "mpd" {
+#    bindsym $mod+t       exec mpc toggle; mode "default"
+#    bindsym $mod+n       exec mpc next; mode "default"
+#    bindsym $mod+p       exec mpc prev; mode "default"
+#    bindsym $mod+s       exec mpc stop; mode "default"
+#    bindsym $mod+b       exec mpc seek -7
+#    bindsym $mod+f       exec mpc seek +7
+#
+#    # back to normal: Enter or Escape
+#    bindsym Return mode "default"
+#    bindsym Escape mode "default"
+#}
 
-mode "mpd" {
-    bindsym $mod+t       exec mpc toggle; mode "default"
-    bindsym $mod+n       exec mpc next; mode "default"
-    bindsym $mod+p       exec mpc prev; mode "default"
-    bindsym $mod+s       exec mpc stop; mode "default"
-    bindsym $mod+b       exec mpc seek -7
-    bindsym $mod+f       exec mpc seek +7
-
-    # back to normal: Enter or Escape
-    bindsym Return mode "default"
-    bindsym Escape mode "default"
+bindsym $mod+m                  mode "monitor"
+mode "monitor" {
+    bindsym n   exec xrandr --output DP-2 --rotate normal; mode "default"
+    bindsym l   exec xrandr --output DP-2 --rotate left; mode "default"
+    bindsym r   exec xrandr --output DP-2 --rotate right; mode "default"
 }
-
 
 #default terminal
 bindsym $mod+Enter exec alacritty
