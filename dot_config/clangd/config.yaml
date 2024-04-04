@@ -4,5 +4,4 @@ CompileFlags:
     - -Wextra
     - -Weffc++
     - -Wsign-conversion
-    - -std=c++2a
     - -DDEBUG
