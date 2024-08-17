@@ -13,10 +13,5 @@
 
 [".config/nvim"]
     type = "git-repo"
-    url = "https://github.com/AstroNvim/AstroNvim"
-    [".config/nvim".clone]
-        args = ["--depth", "1", "--branch", "v3.45.3"]
+    url = "git@github.com:boss14420/astronvim-config.git"
 
-[".config/nvim/lua/user"]
-    type = "git-repo"
-    url = "git@github.com:boss14420/astronvim-user.git"
