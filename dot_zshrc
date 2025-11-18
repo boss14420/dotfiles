@@ -1,171 +1,85 @@
-## prompt
-autoload -U promptinit
-promptinit
+export GEMINI_API_KEY=$(cat ~/.config/gemini_api_key.txt)
 
-## codex
-export ZSH=${ZSH:-~/.zplug/repos/robbyrussell/oh-my-zsh}
-export ZSH_CUSTOM=$ZSH/custom
-source $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh
+################ ZINIT SETUP
+### Added by Zinit's installer
+if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager (%F{33}zdharma-continuum/zinit%F{220})…%f"
+    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
+    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+        print -P "%F{160} The clone has failed.%f%b"
+fi
+
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+# Load important annexes
+zinit light-mode for \
+    zdharma-continuum/zinit-annex-as-monitor \
+    zdharma-continuum/zinit-annex-bin-gem-node \
+    zdharma-continuum/zinit-annex-patch-dl \
+    zdharma-continuum/zinit-annex-rust
+
+################ ZINIT PLUGINS
+# Theme - bullet-train with prompt setup
+setopt prompt_subst
+zinit ice depth"1"
+zinit load caiogondim/bullet-train.zsh
+
+# Essential tools
+zinit load "junegunn/fzf"
+zinit load "urbainvaes/fzf-marks"
+zinit load "mfaerevaag/wd"
+
+# Completions and suggestions
+zinit load "zsh-users/zsh-completions"
+zinit load "zsh-users/zsh-autosuggestions"
+
+zinit as"program" atclone'./build.sh' \
+    atpull'%atclone' pick"smart-suggestion" src"smart-suggestion.plugin.zsh" for \
+        yetone/smart-suggestion
+
+# Syntax highlighting and history search (load last)
+zinit load "zsh-users/zsh-syntax-highlighting"
+zinit load "zsh-users/zsh-history-substring-search"
+
+# OMZ plugins
+zinit snippet OMZ::plugins/git/git.plugin.zsh
+zinit snippet OMZ::plugins/docker/docker.plugin.zsh
+zinit snippet OMZ::plugins/docker-compose/docker-compose.plugin.zsh
+zinit snippet OMZ::plugins/cp/cp.plugin.zsh
+zinit snippet OMZ::plugins/themes/themes.plugin.zsh
+# zinit snippet OMZ::plugins/adb/adb.plugin.zsh
+
+################ BASIC ZSH CONFIGURATION
+# History configuration
+HISTFILE=~/.histfile
+HISTSIZE=10000
+SAVEHIST=10000
+setopt appendhistory autocd extendedglob notify
+setopt HIST_FIND_NO_DUPS
+setopt SHARE_HISTORY
 setopt interactive_comments
+
+# Key bindings
+bindkey -v
 bindkey '^X' create_completion
+bindkey '^T' fzf-completion
+unsetopt beep
 
-############### ZPLUG
-# zplug
-source ~/.zplug/init.zsh
+# Completion setup
+zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
+zstyle ':completion:*' glob 'NUMERIC == 1'
+zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
+zstyle ':completion:*' max-errors 1
+zstyle ':completion:*' menu select
 
-# Keep zplug itself up to date
-zplug 'zplug/zplug', hook-build:'zplug --self-manage'
+autoload -Uz compinit
+compinit
 
-# fzf
-zplug "junegunn/fzf", use:"shell/*.zsh"
-
-# https://github.com/urbainvaes/fzf-marks store and jump to bookmarks in zsh
-zplug "urbainvaes/fzf-marks"
-
-setopt prompt_subst # Make sure prompt is able to be generated properly.
-zplug "caiogondim/bullet-train.zsh", use:bullet-train.zsh-theme, defer:3 # defer until other plugins like oh-my-zsh is loaded
-
-# warp directory
-zplug "mfaerevaag/wd", as:command, use:"wd.sh", hook-load:"wd() { . $ZPLUG_REPOS/mfaerevaag/wd/wd.sh }"
-
-
-zplug "zsh-users/zsh-completions"
-zplug "zsh-users/zsh-autosuggestions"
-zplug "zsh-users/zsh-syntax-highlighting", defer:2
-zplug "zsh-users/zsh-history-substring-search", defer:3
-
-# Supports oh-my-zsh plugins and the like
-zplug "plugins/git",   from:oh-my-zsh
-zplug "plugins/docker",   from:oh-my-zsh
-zplug "plugins/docker-compose",   from:oh-my-zsh
-
-## codex
-# zplug "tom-doerr/zsh_codex", from:oh-my-zsh
-
-# Install plugins if there are plugins that have not been installed
-if ! zplug check --verbose; then
-    printf "Install? [y/N]: "
-    if read -q; then
-        echo; zplug install
-    fi
-fi
-
-# Then, source plugins and add commands to $PATH
-zplug load # --verbose
-
-################ ALIAS
-
-alias diff='colordiff'              # requires colordiff package
-export GREP_COLOR="1;33"
-alias grep='grep --color=auto'
-alias egrep='egrep --color=auto'
-alias fgrep='fgrep --color=auto'
-alias more='less'
-alias df='df -h'
-alias du='du -c -h'
-alias mkdir='mkdir -p -v'
-alias nano='nano -w'
-alias ping='ping -c 5'
-alias ..='cd ..'
-alias ...='cd ../..'
-alias ....='cd ../../../'
-alias .....='cd ../../../../'
-#alias cp='cp -iv'
-alias rmv='rsync -v --progress --remove-source-files'
-#alias mv='mv -iv'
-#alias rm='rm -iv'
-#alias rmdir='rmdir -v'
-#alias ln='ln -v'
-alias chmod="chmod -c"
-alias chown="chown -c"
-alias view='vim -v'
-alias nautilus='nautilus --no-desktop'
-alias nemo='nemo --no-desktop'
-
-# new commands
-alias da='date "+%A, %B %d, %Y [%T]"'
-alias du1='du --max-depth=1'
-alias hist='history | grep $1'      # requires an argument
-alias openports='netstat --all --numeric --programs --inet'
-#alias pg='ps -Af | grep $1'        # requires an argument
-alias pg='ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,args | grep $1'
-
-alias grub-update='grub-mkconfig -o /boot/grub/grub.cfg'
-alias update-grub='grub-mkconfig -o /boot/grub/grub.cfg'
-#alias update-fluxkey="kill -s USR2 `xprop -root _BLACKBOX_PID | awk '{print $3}'`" 2> /dev/null
-alias kindle='python2 /media/Document/Document/program/Kindelabra/Kindelabra.py'
-alias dedrm='python2 /usr/bin/dedrm $1 $1.dedrm 04E55893LS'
-alias kw='sudo pkill wvdial'
-
-#Copy to NAS at 192.168.1.99
-alias nascp='tar cvz "$1" | ssh root@192.168.1.99 -C "tar cvz -C \"$2\""'
-
-# privileged access
-if [ $UID -ne 0 ]; then
-    alias sudo='sudo '
-    alias scat='sudo cat'
-    alias svim='sudo vim'
-    alias root='sudo su'
-    alias reboot='sudo reboot'
-    alias halt='sudo halt'
-    alias update='sudo pacman -Su'
-    alias netcfg='sudo netcfg2'
-fi
-
-# ls
-eval $(dircolors -b)
-alias ls='ls -hF --color=always'
-alias lr='ls -R'                    # recursive ls
-alias ll='ls -l'
-alias la='ll -A'
-alias lx='ll -BX'                   # sort by extension
-alias lz='ll -rS'                   # sort by size
-alias lt='ll -rt'                   # sort by date
-alias lm='la | more'
-
-# safety features
-#alias cp='cp -i'
-#alias mv='mv -i'
-#alias rm='rm -I'                    # 'rm -i' prompts for every file
-#alias ln='ln -i'
-alias chown='chown --preserve-root'
-alias chmod='chmod --preserve-root'
-alias chgrp='chgrp --preserve-root'
-
-alias inxi='inxi -PACDGnm'
-alias kc='kubectl'
-alias kn='kubens'
-alias kx='kubectx'
-
-
-# Less Colors for Man Pages
-
-export LESS_TERMCAP_mb=$'\E[01;31m'	# begin blinking
-export LESS_TERMCAP_md=$'\E[01;31m'	# begin bold
-export LESS_TERMCAP_me=$'\E[0m'		# end mode
-export LESS_TERMCAP_se=$'\E[0m'		# end standout-mode
-export LESS_TERMCAP_so=$'\E[01;44;33m'	# begin standout-mode - info box
-export LESS_TERMCAP_ue=$'\E[0m'		# end underline
-export LESS_TERMCAP_us=$'\E[01;32m'	# begin underline
-export LESS="-R"
-#export LESSCOLORIZER="pygmentize"
-
-
-
-################ END ALIAS
-
-################ OH-MY-ZSH
-##
-## Path to your oh-my-zsh installation.
-##ZSH=/usr/share/oh-my-zsh/
-#ZSH=~/.oh-my-zsh/
-
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
+################ THEME CONFIGURATION
 ZSH_THEME="bullet-train"
-#DEFAULT_USER="boss14420"
 
 function my_git_info() {
     local vcs_info=$(echo $vcs_info_msg_0_ | sed -re 's/.*\[(.*)\].*/\1/')
@@ -174,17 +88,6 @@ function my_git_info() {
 
 BULLETTRAIN_GIT_PROMPT_CMD="\$(my_git_info)"
 BULLETTRAIN_EXEC_TIME_SHOW=true
-
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
-
-# Uncomment the following line to use hyphen-insensitive completion. Case
-# sensitive completion must be off. _ and - will be interchangeable.
-# HYPHEN_INSENSITIVE="true"
-
-# Uncomment the following line to disable bi-weekly auto-update checks.
-DISABLE_AUTO_UPDATE="true"
-
 BULLETTRAIN_KCTX_BG="gray"
 
 BULLETTRAIN_PROMPT_ORDER=(
@@ -192,112 +95,61 @@ BULLETTRAIN_PROMPT_ORDER=(
   status
   custom
   context
-  kctx
+  #kctx
   dir
   screen
   virtualenv
-  #conda
-  aws
-  git
+  #aws
+  # git
   cmd_exec_time
 )
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
 
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
+################ CODEX SETUP
+export ZSH=${ZSH:-~/.zplug/repos/robbyrussell/oh-my-zsh}
+export ZSH_CUSTOM=$ZSH/custom
+if [[ -f $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh ]]; then
+    source $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh
+fi
 
-# Uncomment the following line to disable auto-setting terminal title.
-# DISABLE_AUTO_TITLE="true"
+################ ENVIRONMENT VARIABLES
+export EDITOR=vim
+export GPG_TTY=$(tty)
+export WORKON_HOME=~/.virtualenvs
 
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+# Colors for grep and ls
+export GREP_COLOR="1;33"
+eval $(dircolors -b)
 
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+# Less colors for man pages
+export LESS_TERMCAP_mb=$'\E[01;31m'
+export LESS_TERMCAP_md=$'\E[01;31m'
+export LESS_TERMCAP_me=$'\E[0m'
+export LESS_TERMCAP_se=$'\E[0m'
+export LESS_TERMCAP_so=$'\E[01;44;33m'
+export LESS_TERMCAP_ue=$'\E[0m'
+export LESS_TERMCAP_us=$'\E[01;32m'
+export LESS="-R"
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
+# Java
+JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+export PATH="${JAVA_HOME}/bin:$PATH"
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
+# PATH additions
+export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/go/bin:$HOME/.dotnet/tools:$PATH"
+export PATH=$PATH:$HOME/.cargo/bin
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
-
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker docker-compose adb cp themes)
-
-# User configuration
-
-#export PATH=$HOME/bin:/usr/local/bin:$PATH
-# export MANPATH="/usr/local/man:$MANPATH"
-
-#source $ZSH/oh-my-zsh.sh
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-
-################################################################
-# FZF
-
-#source /usr/share/fzf/completion.zsh
-#source /usr/share/fzf/key-bindings.zsh
-
-# Use ~~ as the trigger sequence instead of the default **
+################ FZF CONFIGURATION
 export FZF_COMPLETION_TRIGGER='**'
-
-# Tab key binding
-bindkey '^T' fzf-completion
-
-# Options to fzf command
 export FZF_COMPLETION_OPTS='+c -x'
 
-# Use fd (https://github.com/sharkdp/fd) instead of the default find
-# command for listing path candidates.
-# - The first argument to the function ($1) is the base path to start traversal
-# - See the source code (completion.{bash,zsh}) for the details.
 _fzf_compgen_path() {
   fd --hidden --follow --exclude ".git" . "$1"
 }
 
-# Use fd to generate the list for directory completion
 _fzf_compgen_dir() {
   fd --type d --hidden --follow --exclude ".git" . "$1"
 }
 
-# (EXPERIMENTAL) Advanced customization of fzf options via _fzf_comprun function
-# - The first argument to the function is the name of the command.
-# - You should make sure to pass the rest of the arguments to fzf.
 _fzf_comprun() {
   local command=$1
   shift
@@ -310,99 +162,123 @@ _fzf_comprun() {
   esac
 }
 
-#################################################################3
-### old configs
+################ ALIASES
+# Color and enhanced commands
+alias diff='colordiff'
+alias grep='grep --color=auto'
+alias egrep='egrep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias more='less'
+alias df='df -h'
+alias du='du -c -h'
+alias mkdir='mkdir -p -v'
+alias nano='nano -w'
+alias ping='ping -c 5'
+alias chmod="chmod -c"
+alias chown="chown -c"
+alias view='vim -v'
+alias nautilus='nautilus --no-desktop'
+alias nemo='nemo --no-desktop'
 
-# The following lines were added by compinstall
+# Navigation shortcuts
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../../'
+alias .....='cd ../../../../'
 
-zstyle ':completion:*' completer _expand _complete _ignored _correct _approximate
-zstyle ':completion:*' glob 'NUMERIC == 1'
-zstyle ':completion:*' matcher-list '' 'm:{[:lower:]}={[:upper:]}' 'm:{[:lower:][:upper:]}={[:upper:][:lower:]}'
-zstyle ':completion:*' max-errors 1
-zstyle ':completion:*' menu select
-zstyle :compinstall filename '/home/boss14420/.zshrc'
+# File operations
+alias rmv='rsync -v --progress --remove-source-files'
 
-autoload -Uz compinit
-compinit
-# End of lines added by compinstall
-# Lines configured by zsh-newuser-install
-HISTFILE=~/.histfile
-HISTSIZE=10000
-SAVEHIST=10000
-setopt appendhistory autocd extendedglob notify
-setopt HIST_FIND_NO_DUPS
-setopt SHARE_HISTORY
+# List commands
+alias ls='ls -hF --color=always'
+alias lr='ls -R'
+alias ll='ls -l'
+alias la='ll -A'
+alias lx='ll -BX'
+alias lz='ll -rS'
+alias lt='ll -rt'
+alias lm='la | more'
 
-unsetopt beep
-bindkey -v
-# End of lines configured by zsh-newuser-install
+# System information
+alias da='date "+%A, %B %d, %Y [%T]"'
+alias du1='du --max-depth=1'
+alias hist='history | grep $1'
+alias openports='netstat --all --numeric --programs --inet'
+alias pg='ps -eo pid,tid,class,rtprio,ni,pri,psr,pcpu,stat,wchan:14,args | grep $1'
+alias inxi='inxi -PACDGnm'
 
-[ "$DISPLAY" = ":0.0" ] && alias fluxbox-reload="kill -SIGHUP `xprop -root _BLACKBOX_PID | awk '{print $3}'`"
+# Kubernetes shortcuts
+alias kc='kubectl'
+alias kn='kubens'
+alias kx='kubectx'
 
-# pulseaudio --start &> /dev/null &
-
-export WORKON_HOME=~/.virtualenvs
-if [[ -f /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh ]]; then
-    source /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh
-else
-    source /usr/bin/virtualenvwrapper_lazy.sh
-fi
-
-if [[ $(tty) = /dev/tty2 ]]; then
-    #export TERM="fbterm"
-    fcitx-fbterm-helper -l
-fi
-
-# tmux
-alias tmux="TERM=screen-256color-bce tmux"
-
-# kubectl completion
-
-#source <(command kubectl completion zsh)
-#source <(helm completion zsh)
-
-# zoxide
-eval "$(zoxide init zsh)"
-
-#kubectl () {
-#    command kubectl $*
-#    if [[ -z $KUBECTL_COMPLETE ]]
-#    then
-#        source <(command kubectl completion zsh)
-#        KUBECTL_COMPLETE=1
-#    fi
-#}
-
-# krew
-export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/go/bin:$PATH"
-[ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
-
-autoload -U +X bashcompinit && bashcompinit
-complete -o nospace -C /usr/bin/vault vault
-
-alias xclip="xclip -selection c"
-
-
-complete -o nospace -C /usr/bin/mcli mcli
-
+# Docker shortcuts
 alias dip="docker inspect -f '{{ range .NetworkSettings.Networks }}{{.IPAddress}}{{end}}'"
 
-export EDITOR=vim
+# System management
+alias grub-update='grub-mkconfig -o /boot/grub/grub.cfg'
+alias update-grub='grub-mkconfig -o /boot/grub/grub.cfg'
+alias tmux="TERM=screen-256color-bce tmux"
+alias xclip="xclip -selection c"
 
-export PATH="$PATH:/home/boss14420/.dotnet/tools"
+# Safety features
+alias chown='chown --preserve-root'
+alias chmod='chmod --preserve-root'
+alias chgrp='chgrp --preserve-root'
 
+# Privileged access (if not root)
+if [ $UID -ne 0 ]; then
+    alias sudo='sudo '
+    alias scat='sudo cat'
+    alias svim='sudo vim'
+    alias root='sudo su'
+    alias reboot='sudo reboot'
+    alias halt='sudo halt'
+    alias update='sudo pacman -Su'
+    alias netcfg='sudo netcfg2'
+fi
+
+################ FUNCTIONS
 function jwt-decode() {
   sed 's/\./\n/g' <<< $(cut -d. -f1,2 <<< $1) | base64 --decode | jq
 }
 
-# GPG
-export GPG_TTY=$(tty)
+################ EXTERNAL INTEGRATIONS
+# Virtualenvwrapper
+if [[ -f /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh ]]; then
+    source /usr/share/virtualenvwrapper/virtualenvwrapper_lazy.sh
+elif [[ -f /usr/bin/virtualenvwrapper_lazy.sh ]]; then
+    source /usr/bin/virtualenvwrapper_lazy.sh
+fi
+
+# Conda
+[ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
+
+# FZF
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+# Zoxide
+# command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+
+# nvim
+export PATH=$HOME/.local/share/bob/nvim-bin:$PATH
+
+# Autocompletions
+autoload -U +X bashcompinit && bashcompinit
+command -v vault >/dev/null && complete -o nospace -C /usr/bin/vault vault
+command -v mcli >/dev/null && complete -o nospace -C /usr/bin/mcli mcli
+
+################ TERMINAL SPECIFIC SETTINGS
+# Fluxbox reload (if on display :0.0)
+[ "$DISPLAY" = ":0.0" ] && alias fluxbox-reload="kill -SIGHUP `xprop -root _BLACKBOX_PID | awk '{print $3}'`"
+
+# Fcitx for tty2
+if [[ $(tty) = /dev/tty2 ]]; then
+    fcitx-fbterm-helper -l
+fi
+
+################ HIGHLIGHTING STYLES
 ZSH_HIGHLIGHT_STYLES[comment]='fg=grey'
 
-# Java
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-PATH=${JAVA_HOME}/bin:$PATH
-
-neofetch
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+################ STARTUP
+command -v neofetch >/dev/null && neofetch
