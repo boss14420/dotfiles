@@ -1,0 +1,58 @@
+{
+  "LOG": false,
+  "API_TIMEOUT_MS": 600000,
+  "Providers": [
+    {
+      "name": "Openrouter",
+      "api_base_url": "https://openrouter.ai/api/v1/chat/completions",
+      "api_key": {{ (bitwarden "item" "openrouter_api_key").notes | quote }},
+      "models": [
+        "z-ai/glm-4.5",
+        "qwen/qwen3-coder:free",
+        "qwen/qwen3-235b-a22b:free",
+        "openrouter/horizon-beta"
+      ],
+      "transformer": {
+        "use": [
+          "Openrouter"
+        ]
+      }
+    },
+    {
+      "name": "ollama",
+      "api_base_url": "http://10.1.1.31:11434/v1/chat/completions",
+      "api_key": "ollama",
+      "models": [
+        "qwen3:latest",
+        "gpt-oss:latest",
+        "granite3.2:2b",
+        "deepseek-r1:1.5b"
+      ]
+    },
+    {
+      "name": "gemini",
+      "api_base_url": "https://generativelanguage.googleapis.com/v1beta/models/",
+      "api_key": {{ (bitwarden "item" "gemini_api_key").notes | quote }},
+      "models": ["gemini-2.5-flash", "gemini-2.5-pro"],
+      "transformer": {
+        "use": ["gemini"]
+      }
+    },
+    {
+      "name": "deepseek",
+      "api_base_url": "https://api.deepseek.com/chat/completions",
+      "api_key": {{ (bitwarden "item" "deepseek_api_key").notes | quote }}",
+      "models": ["deepseek-chat", "deepseek-reasoner"],
+      "transformer": {
+        "use": ["deepseek"],
+        "deepseek-chat": {
+          "use": ["tooluse"]
+        }
+      }
+    }
+  ],
+  "Router": {
+    "default2": "deepseek,deepseek-chat",
+    "default": "gemini,gemini-2.5-flash"
+  }
+}
