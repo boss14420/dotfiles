@@ -1,5 +1,29 @@
 export GEMINI_API_KEY=$(cat ~/.config/gemini_api_key.txt)
 
+################ FZF CONFIGURATION
+export FZF_COMPLETION_TRIGGER='**'
+export FZF_COMPLETION_OPTS='+c -x'
+
+_fzf_compgen_path() {
+  fd --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_compgen_dir() {
+  fd --type d --hidden --follow --exclude ".git" . "$1"
+}
+
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf "$@" --preview 'tree -C {} | head -200' ;;
+    export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
+    ssh)          fzf "$@" --preview 'dig {}' ;;
+    *)            fzf "$@" ;;
+  esac
+}
+
 ################ ZINIT SETUP
 ### Added by Zinit's installer
 if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
@@ -28,9 +52,21 @@ zinit ice depth"1"
 zinit load caiogondim/bullet-train.zsh
 
 # Essential tools
-zinit load "junegunn/fzf"
+zinit pack"bgn-binary+keys" for junegunn/fzf
+zinit light "Aloxaf/fzf-tab"
 zinit load "urbainvaes/fzf-marks"
 zinit load "mfaerevaag/wd"
+
+# zoxide
+zinit ice wait"2" as"command" from"gh-r" lucid \
+  mv"zoxide*/zoxide -> zoxide" \
+  atclone"./zoxide init zsh > init.zsh" \
+  atpull"%atclone" src"init.zsh" nocompile'!'
+zinit light ajeetdsouza/zoxide
+
+function zz() {
+    __zoxide_zi "$@"
+}
 
 # Completions and suggestions
 zinit load "zsh-users/zsh-completions"
@@ -64,8 +100,7 @@ setopt interactive_comments
 
 # Key bindings
 bindkey -v
-bindkey '^X' create_completion
-bindkey '^T' fzf-completion
+# bindkey '^T' fzf-completion
 unsetopt beep
 
 # Completion setup
@@ -104,13 +139,6 @@ BULLETTRAIN_PROMPT_ORDER=(
   cmd_exec_time
 )
 
-################ CODEX SETUP
-export ZSH=${ZSH:-~/.zplug/repos/robbyrussell/oh-my-zsh}
-export ZSH_CUSTOM=$ZSH/custom
-if [[ -f $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh ]]; then
-    source $ZSH_CUSTOM/plugins/zsh_codex/zsh_codex.plugin.zsh
-fi
-
 ################ ENVIRONMENT VARIABLES
 export EDITOR=vim
 export GPG_TTY=$(tty)
@@ -137,30 +165,6 @@ export PATH="${JAVA_HOME}/bin:$PATH"
 # PATH additions
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/go/bin:$HOME/.dotnet/tools:$PATH"
 export PATH=$PATH:$HOME/.cargo/bin
-
-################ FZF CONFIGURATION
-export FZF_COMPLETION_TRIGGER='**'
-export FZF_COMPLETION_OPTS='+c -x'
-
-_fzf_compgen_path() {
-  fd --hidden --follow --exclude ".git" . "$1"
-}
-
-_fzf_compgen_dir() {
-  fd --type d --hidden --follow --exclude ".git" . "$1"
-}
-
-_fzf_comprun() {
-  local command=$1
-  shift
-
-  case "$command" in
-    cd)           fzf "$@" --preview 'tree -C {} | head -200' ;;
-    export|unset) fzf "$@" --preview "eval 'echo \$'{}" ;;
-    ssh)          fzf "$@" --preview 'dig {}' ;;
-    *)            fzf "$@" ;;
-  esac
-}
 
 ################ ALIASES
 # Color and enhanced commands
@@ -254,11 +258,8 @@ fi
 # Conda
 [ -f /opt/miniconda3/etc/profile.d/conda.sh ] && source /opt/miniconda3/etc/profile.d/conda.sh
 
-# FZF
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-
-# Zoxide
-# command -v zoxide >/dev/null && eval "$(zoxide init zsh)"
+# # FZF
+# [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
 # nvim
 export PATH=$HOME/.local/share/bob/nvim-bin:$PATH
