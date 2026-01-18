@@ -72,9 +72,11 @@ function zz() {
 zinit load "zsh-users/zsh-completions"
 zinit load "zsh-users/zsh-autosuggestions"
 
-zinit as"program" atclone'./build.sh' \
-    atpull'%atclone' pick"smart-suggestion" src"smart-suggestion.plugin.zsh" for \
-        yetone/smart-suggestion
+if [[ "$(tty)" != /dev/tty[0-9]* ]] && [[ "$SHELL" == *zsh ]]; then
+    zinit as"program" atclone'./build.sh' \
+        atpull'%atclone' pick"smart-suggestion" src"smart-suggestion.plugin.zsh" for \
+            yetone/smart-suggestion
+fi
 
 # Syntax highlighting and history search (load last)
 zinit load "zsh-users/zsh-syntax-highlighting"
@@ -124,6 +126,47 @@ function my_git_info() {
 BULLETTRAIN_GIT_PROMPT_CMD="\$(my_git_info)"
 BULLETTRAIN_EXEC_TIME_SHOW=true
 BULLETTRAIN_KCTX_BG="gray"
+
+# Detect OS and customize bullet-train directory colors
+
+# Load OS identification details if available
+if [ -f /etc/os-release ]; then
+    . /etc/os-release
+    OS_ID=$ID
+elif [ -f /etc/arch-release ]; then
+    OS_ID="arch"
+elif [ -f /etc/debian_version ]; then
+    OS_ID="debian"
+else
+    # Fallback to check for common IDs if /etc/os-release exists but ID is not standard
+    OS_ID="other"
+fi
+
+# Set default colors (Other: Gray BG / Black FG)
+BULLETTRAIN_DIR_BG="242" # Light Gray (256 color code)
+BULLETTRAIN_DIR_FG="0"   # Black
+
+case "$OS_ID" in
+    # Arch Linux: Blue BG / White FG
+    arch)
+        BULLETTRAIN_DIR_BG="12"  # Blue
+        BULLETTRAIN_DIR_FG="15"  # White
+        ;;
+
+    # Debian Family (debian, ubuntu, mint, etc.): Green BG / White FG
+    debian|ubuntu|mint|pop)
+        BULLETTRAIN_DIR_BG="2"   # Green
+        BULLETTRAIN_DIR_FG="15"  # White
+        ;;
+
+    # Fedora Family (fedora, rhel, centos, etc.): Yellow BG / Black FG
+    fedora|rhel|centos|rocky|almalinux)
+        BULLETTRAIN_DIR_BG="3"   # Yellow
+        BULLETTRAIN_DIR_FG="0"   # Black
+        ;;
+esac
+
+# Note: These variables must be set before the bullet-train theme is sourced/loaded.
 
 BULLETTRAIN_PROMPT_ORDER=(
   time
@@ -263,6 +306,82 @@ fi
 
 # nvim
 export PATH=$HOME/.local/share/bob/nvim-bin:$PATH
+
+# prefer homebrew
+export PATH=$HOME/.homebrew/bin:$PATH
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
+
+. $HOME/.config/telegram_bot.conf
+
+# functions to notify to tg
+_tg_send() {
+    local token="$TELEGRAM_BOT_TOKEN"
+    local chat_id="$TELEGRAM_BOT_CHAT_ID"
+    [[ -z "$token" -o -z "$chat_id" ]] && (
+        echo "variable TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_CHAT_ID not set"
+        return 1
+    )
+    local text_payload="$1"
+    [[ -z "$text_payload" ]] && return 1
+    curl -s -X POST "https://api.telegram.org/bot$token/sendMessage" \
+        -d "chat_id=$chat_id" \
+        -d "text=$text_payload" \
+        -d "parse_mode=Markdown" > /dev/null
+}
+
+_tg_payload_base() {
+    local user=$(whoami)
+    local host=$(hostname)
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
+    local full_payload="🖥 *System Info*%0A*User:* $user%0A*Host:* $host%0A*Time:* $timestamp%0A%0A"
+    echo "$full_payload"
+}
+
+tg_msg() {
+    local message=""
+    if [ ! -t 0 ]; then
+        message=$(cat)
+    else
+        message="$1"
+    fi
+    [[ -z "$message" ]] && return 1
+    local full_payload=$(_tg_payload_base)
+    local full_payload="${full_payload}💬 *Message*%0A\`$message\`%0A%0A"
+    _tg_send "$full_payload"
+}
+
+tg_last() {
+    local exit_code=$?
+    local last_cmd=$(fc -ln | sed 's/^[ \t]*//' | grep -vE '^tg_last' | tail -1)
+    local user=$(whoami)
+    local host=$(hostname)
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
+    local status="SUCCESS ✅"
+    [[ $exit_code -ne 0 ]] && status="FAILED ❌"
+
+    local full_payload=$(_tg_payload_base)
+    local message="${full_payload}📌 *Command*%0A\`$last_cmd\`%0A%0A*Status:* $status (Code: $exit_code)"
+    _tg_send "$message"
+}
+
+tg_pipe() {
+    local content=""
+    if [ ! -t 0 ]; then
+        content=$(cat)
+    fi
+    [[ -z "$content" ]] && return 1
+
+    local piped_cmd=$(fc -ln | sed 's/^[ \t]*//' | tail -1)
+
+    local full_payload=$(_tg_payload_base)
+    local full_payload="${full_payload}📌 *Piped Command*%0A\`$piped_cmd\`%0A%0A"
+    local full_payload="${full_payload}📥 *Output*%0A\`$content\`%0A%0A"
+    _tg_send "$full_payload"
+}
 
 # Autocompletions
 autoload -U +X bashcompinit && bashcompinit
