@@ -115,6 +115,11 @@ zstyle ':completion:*' menu select
 autoload -Uz compinit
 compinit
 
+# Autocompletions
+autoload -U +X bashcompinit && bashcompinit
+command -v vault >/dev/null && complete -o nospace -C /usr/bin/vault vault
+command -v mcli >/dev/null && complete -o nospace -C /usr/bin/mcli mcli
+
 ################ THEME CONFIGURATION
 ZSH_THEME="bullet-train"
 
@@ -201,17 +206,13 @@ export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
 export LESS="-R"
 
-# Java
-JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
-export PATH="${JAVA_HOME}/bin:$PATH"
-
 # PATH additions
 export PATH="${KREW_ROOT:-$HOME/.krew}/bin:$HOME/go/bin:$HOME/.dotnet/tools:$PATH"
 export PATH=$PATH:$HOME/.cargo/bin
 
 ################ ALIASES
 # Color and enhanced commands
-alias diff='colordiff'
+command -v colordiff >/dev/null && alias diff='colordiff'
 alias grep='grep --color=auto'
 alias egrep='egrep --color=auto'
 alias fgrep='fgrep --color=auto'
@@ -237,7 +238,7 @@ alias .....='cd ../../../../'
 alias rmv='rsync -v --progress --remove-source-files'
 
 # List commands
-alias ls='ls -hF --color=always'
+alias ls='ls -hF --color=auto'
 alias lr='ls -R'
 alias ll='ls -l'
 alias la='ll -A'
@@ -307,24 +308,28 @@ fi
 # # FZF
 # [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
 
-# nvim
-export PATH=$HOME/.local/share/bob/nvim-bin:$PATH
-
-# prefer homebrew
-export PATH=$HOME/.homebrew/bin:$PATH
-
 # nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+# npm home binaries
+command -v npm >/dev/null && export PATH="$(npm config get prefix)/bin:$PATH"
+
+# nvim
+export PATH=$HOME/.local/share/bob/nvim-bin:$PATH
+export EDITOR=nvim
+
+# prefer homebrew
+export PATH=$HOME/.homebrew/bin:$PATH
+
+################ TG NOTIFY FUNCTIONS
 . $HOME/.config/telegram_bot.conf
 
-# functions to notify to tg
 _tg_send() {
     local token="$TELEGRAM_BOT_TOKEN"
     local chat_id="$TELEGRAM_BOT_CHAT_ID"
-    [[ -z "$token" -o -z "$chat_id" ]] && (
+    [[ -z "$token" || -z "$chat_id" ]] && (
         echo "variable TELEGRAM_BOT_TOKEN or TELEGRAM_BOT_CHAT_ID not set"
         return 1
     )
@@ -363,11 +368,13 @@ tg_last() {
     local user=$(whoami)
     local host=$(hostname)
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
-    local status="SUCCESS ✅"
-    [[ $exit_code -ne 0 ]] && status="FAILED ❌"
+    local cwd=$(pwd)
+    local cmd_status="SUCCESS ✅"
+    [[ $exit_code -ne 0 ]] && cmd_status="FAILED ❌"
 
     local full_payload=$(_tg_payload_base)
-    local message="${full_payload}📌 *Command*%0A\`$last_cmd\`%0A%0A*Status:* $status (Code: $exit_code)"
+    local full_payload="${full_payload}📁 *Directory*%0A\`$cwd\`%0A%0A"
+    local message="${full_payload}📌 *Command*%0A\`$last_cmd\`%0A%0A*Status:* $cmd_status (Code: $exit_code)"
     _tg_send "$message"
 }
 
@@ -379,21 +386,16 @@ tg_pipe() {
     [[ -z "$content" ]] && return 1
 
     local piped_cmd=$(fc -ln | sed 's/^[ \t]*//' | tail -1)
+    local cwd=$(pwd)
 
     local full_payload=$(_tg_payload_base)
+    local full_payload="${full_payload}📁 *Directory*%0A\`$cwd\`%0A%0A"
     local full_payload="${full_payload}📌 *Piped Command*%0A\`$piped_cmd\`%0A%0A"
     local full_payload="${full_payload}📥 *Output*%0A\`$content\`%0A%0A"
     _tg_send "$full_payload"
 }
 
-# Autocompletions
-autoload -U +X bashcompinit && bashcompinit
-command -v vault >/dev/null && complete -o nospace -C /usr/bin/vault vault
-command -v mcli >/dev/null && complete -o nospace -C /usr/bin/mcli mcli
-
 ################ TERMINAL SPECIFIC SETTINGS
-# Fluxbox reload (if on display :0.0)
-[ "$DISPLAY" = ":0.0" ] && alias fluxbox-reload="kill -SIGHUP `xprop -root _BLACKBOX_PID | awk '{print $3}'`"
 
 # Fcitx for tty2
 if [[ $(tty) = /dev/tty2 ]]; then
