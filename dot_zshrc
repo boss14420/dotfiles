@@ -131,6 +131,7 @@ function my_git_info() {
 BULLETTRAIN_GIT_PROMPT_CMD="\$(my_git_info)"
 BULLETTRAIN_EXEC_TIME_SHOW=true
 BULLETTRAIN_KCTX_BG="gray"
+BULLETTRAIN_VIRTUALENV_FG="black"
 
 # Detect OS and customize bullet-train directory colors
 
@@ -166,7 +167,7 @@ case "$OS_ID" in
 
     # Fedora Family (fedora, rhel, centos, etc.): Yellow BG / Black FG
     fedora|rhel|centos|rocky|almalinux)
-        BULLETTRAIN_DIR_BG="3"   # Yellow
+        BULLETTRAIN_DIR_BG="cyan"   # cyan
         BULLETTRAIN_DIR_FG="0"   # Black
         ;;
 esac
