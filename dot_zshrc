@@ -327,6 +327,20 @@ export PATH=$HOME/.homebrew/bin:$PATH
 ################ TG NOTIFY FUNCTIONS
 . $HOME/.config/telegram_bot.conf
 
+# define hook to capture currently executing command
+autoload -Uz add-zsh-hook
+
+tg_report_preexec_hook() {
+    # $1: The raw command string
+    # $2: The expanded command
+    # $3: The command as it will appear in history
+    local s="$1"
+    # Trim leading spaces
+    export TG_REPORT_CURRENT_COMMAND="${${s##[[:space:]]#}%%[[:space:]]#}"
+}
+
+add-zsh-hook preexec tg_report_preexec_hook
+
 _tg_send() {
     local token="$TELEGRAM_BOT_TOKEN"
     local chat_id="$TELEGRAM_BOT_CHAT_ID"
@@ -365,7 +379,11 @@ tg_msg() {
 
 tg_last() {
     local exit_code=$?
-    local last_cmd=$(fc -ln | sed 's/^[ \t]*//' | grep -vE '^tg_last' | tail -1)
+    local last_cmd=$TG_REPORT_CURRENT_COMMAND
+    if [[ "$last_cmd" == "tg_last" ]]; then
+        last_cmd=$(fc -ln | sed -e 's/^[ \t]*//' -e 's/[ \t]*$//' | \
+                   grep -vE '^tg_last' | grep -vE '^$' | tail -1)
+    fi
     local user=$(whoami)
     local host=$(hostname)
     local timestamp=$(date '+%Y-%m-%d %H:%M:%S.%3N')
@@ -380,13 +398,16 @@ tg_last() {
 }
 
 tg_pipe() {
+    local piped_cmd=$TG_REPORT_CURRENT_COMMAND
     local content=""
     if [ ! -t 0 ]; then
         content=$(cat)
+        if (( ${#content} > 2048 )); then
+            content=${content:0:2048}"%0A..."
+        fi
     fi
     [[ -z "$content" ]] && return 1
 
-    local piped_cmd=$(fc -ln | sed 's/^[ \t]*//' | tail -1)
     local cwd=$(pwd)
 
     local full_payload=$(_tg_payload_base)
