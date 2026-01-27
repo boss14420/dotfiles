@@ -400,12 +400,29 @@ tg_last() {
 tg_pipe() {
     local piped_cmd=$TG_REPORT_CURRENT_COMMAND
     local content=""
+    local stream_output=0
+
+    # Check for the -t argument
+    if [[ "$1" == "-t" ]]; then
+        stream_output=1
+        shift # Remove -t from the arguments list
+    fi
+
     if [ ! -t 0 ]; then
-        content=$(cat)
+        if (( stream_output )); then
+            # Magic: Redirect FD 3 to current stdout (1).
+            # 'tee' writes to FD 3 (screen) and stdout (captured by variable).
+            { content=$(tee /dev/fd/3); } 3>&1
+        else
+            content=$(cat)
+        fi
+
+        # Truncate only the content sent to Telegram, not the stream
         if (( ${#content} > 2048 )); then
-            content=${content:0:2048}"%0A..."
+            content=${content:0:1024}"%0A...%0A"${content: -1024}
         fi
     fi
+
     [[ -z "$content" ]] && return 1
 
     local cwd=$(pwd)
